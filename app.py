@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -78,6 +79,7 @@ if st.button("結果を表示する", type="primary"):
     ratio = round((positive_score / negative_score) * 10) / 10 if negative_score > 0 else 0
 
     # 結果表示セクション
+    st.markdown('<div id="measurement-results"></div>', unsafe_allow_html=True)
     st.header("測定結果")
     
     col1, col2, col3 = st.columns(3)
@@ -85,7 +87,7 @@ if st.button("結果を表示する", type="primary"):
     col2.metric("ネガティブ感情", f"{negative_score} 点")
     col3.metric("ポジティビティ比率", f"{ratio}")
 
-    st.info("ポジティビティ比率を１以上にすることがウェル・ビーイングにつながります。")
+    st.info("ポジティビティ比率を 1.0 以上にすることがウェル・ビーイングにつながります。")
 
     # グラフ表示
     chart_col1, chart_col2 = st.columns(2)
@@ -101,7 +103,7 @@ if st.button("結果を表示する", type="primary"):
             y="点数",
             color="感情タイプ",
             range_y=[0, 50],
-            color_discrete_map={"ネガティブ感情": "#4169E1", "ポジティブ感情": "#FFA500"}
+            color_discrete_map={"ポジティブ感情": "#FFA500", "ネガティブ感情": "#004D80"}
         )
         fig.update_layout(showlegend=False, title=dict(text="ポジティブ感情とネガティブ感情"))
         st.plotly_chart(fig, width='stretch')
@@ -111,8 +113,9 @@ if st.button("結果を表示する", type="primary"):
             values=[positive_score, negative_score],
             labels=["ポジティブ感情", "ネガティブ感情"],
             hole=0.6,
-            marker_colors=["#FFA500", "#4169E1"],
+            marker_colors=["#FFA500", "#004D80"],
             textinfo="label+percent",
+            textfont=dict(weight="bold"),
         )])
         fig2.update_layout(
             showlegend=False,
@@ -120,13 +123,13 @@ if st.button("結果を表示する", type="primary"):
                 dict(
                     text="ポジティビティ比率",
                     x=0.5, y=0.6,
-                    font_size=16,
+                    font=dict(size=16, weight="bold"),
                     showarrow=False,
                 ),
                 dict(
                     text=f"{ratio:.1f}",
                     x=0.5, y=0.45,
-                    font_size=36,
+                    font=dict(size=36, weight="bold"),
                     showarrow=False,
                 ),
             ],
@@ -136,3 +139,16 @@ if st.button("結果を表示する", type="primary"):
     # 比率に応じた演出
     if ratio >= 1.0:
         st.balloons()
+
+    # 結果セクションへ自動スクロール
+    components.html(
+        """
+        <script>
+            const results = window.parent.document.getElementById('measurement-results');
+            if (results) {
+                results.scrollIntoView({behavior: 'smooth'});
+            }
+        </script>
+        """,
+        height=0,
+    )
